@@ -3,6 +3,7 @@ package com.thoughtworks.rslist.api;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,6 +15,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import static org.hamcrest.Matchers.is;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -44,5 +47,21 @@ public class UserControllerTests {
             .contentType(MediaType.APPLICATION_JSON)
             .content(userJson))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    public void shouldNotAddContainedUser() throws Exception {
+        User existUser = UserController.userList.get(0);
+        int length = UserController.userList.size();
+        String userJson = objectMapper.writeValueAsString(existUser);
+
+        mockMvc.perform(post("/user")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(userJson))
+            .andExpect(status().isOk());
+        mockMvc.perform(get("/user")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()", is(length)));
     }
 }

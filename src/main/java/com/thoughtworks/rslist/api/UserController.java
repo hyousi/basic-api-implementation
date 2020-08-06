@@ -27,7 +27,9 @@ public class UserController {
 
     @PostMapping("/user")
     public void addUser(@RequestBody @Valid User user) {
-        userList.add(user);
+        if (!userList.contains(user)) {
+            userList.add(user);
+        }
     }
 
 }
