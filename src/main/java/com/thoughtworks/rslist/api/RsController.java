@@ -28,7 +28,7 @@ public class RsController {
 
     @GetMapping("/rs/list")
     public List<RsEvent> getRsEvents(@RequestParam(required = false) Integer start,
-                              @RequestParam(required = false) Integer end) {
+        @RequestParam(required = false) Integer end) {
         // FIXME: Exception Handling - index out of bound.
         if (start == null || end == null) {
             return rsEventList;
@@ -50,6 +50,11 @@ public class RsController {
 
     @PostMapping("/rs/{index}")
     public void updateRsEvent(@PathVariable Integer index, @RequestBody RsEvent rsEvent) {
-        rsEventList.set(index-1, rsEvent);
+        if (rsEvent.getEventName() != null) {
+            rsEventList.get(index - 1).setEventName(rsEvent.getEventName());
+        }
+        if (rsEvent.getKeyword() != null) {
+            rsEventList.get(index - 1).setKeyword(rsEvent.getKeyword());
+        }
     }
 }

@@ -70,12 +70,27 @@ public class RsControllerTests {
     @Test
     public void shouldUpdateRsEvent() throws Exception {
         RsEvent rsEvent = new RsEvent("第一条时间", "未分类");
-        mockMvc.perform(post("/rs/1").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(rsEvent)))
+        mockMvc.perform(post("/rs/1").contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(rsEvent)))
             .andExpect(status().isOk());
 
         mockMvc.perform(get("/rs/1").contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.eventName", is("第一条时间")))
             .andExpect(jsonPath("$.keyword", is("未分类")))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    public void shouldUpdateRsEventProperty() throws Exception {
+        String request = "{\"keyword\": \"关键词\"}";
+        mockMvc.perform(post("/rs/1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(request))
+            .andExpect(status().isOk());
+
+        mockMvc.perform(get("/rs/1").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.eventName", is("第一条事件")))
+            .andExpect(jsonPath("$.keyword", is("关键词")))
             .andExpect(status().isOk());
     }
 }
