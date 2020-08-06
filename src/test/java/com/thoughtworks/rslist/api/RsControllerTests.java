@@ -2,6 +2,7 @@ package com.thoughtworks.rslist.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.rslist.domain.RsEvent;
+import com.thoughtworks.rslist.domain.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,8 @@ public class RsControllerTests {
 
     @Test
     public void shouldAddRsEvent() throws Exception {
-        RsEvent rsEvent = new RsEvent("第四条事件", "未分类");
+        User user = new User("xiaowang", 19, "female", "a@b.com", "18888888888");
+        RsEvent rsEvent = new RsEvent("第四条事件", "未分类", user);
         mockMvc.perform(post("/rs/list").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(rsEvent)))
             .andExpect(status().isOk());
@@ -68,6 +70,7 @@ public class RsControllerTests {
         assertEquals(4, RsController.rsEventList.size());
         mockMvc.perform(get("/rs/4").contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.eventName", is("第四条事件")))
+            .andExpect(jsonPath("$.user.userName", is("xiaowang")))
             .andExpect(status().isOk());
     }
 
