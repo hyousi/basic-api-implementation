@@ -1,49 +1,55 @@
 package com.thoughtworks.rslist.api;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.thoughtworks.rslist.domain.RsEvent;
+import java.util.ArrayList;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
+@RequestMapping(produces = "application/json; charset=UTF-8")
 public class RsController {
 
-    public static List<String> rsList = init();
+    public static List<RsEvent> rsEventList = init();
 
-    public static List<String> init() {
-        return Stream.of("第一条事件", "第二条事件", "第三条事件").collect(Collectors.toList());
+    public static List<RsEvent> init() {
+        List<RsEvent> rsEventList = new ArrayList<>();
+        rsEventList.add(new RsEvent("第一条事件", "未分类"));
+        rsEventList.add(new RsEvent("第二条事件", "未分类"));
+        rsEventList.add(new RsEvent("第三条事件", "未分类"));
+        return rsEventList;
     }
 
     @GetMapping("/rs/list")
-    public String getRsEvents(@RequestParam(required = false) Integer start,
+    public List<RsEvent> getRsEvents(@RequestParam(required = false) Integer start,
                               @RequestParam(required = false) Integer end) {
         // FIXME: Exception Handling - index out of bound.
         if (start == null || end == null) {
-            return rsList.toString();
+            return rsEventList;
         }
 
-        return rsList.subList(start - 1, end).toString();
+        return rsEventList.subList(start - 1, end);
     }
 
     @GetMapping("/rs/{index}")
-    public String getRsEvent(@PathVariable int index) {
+    public RsEvent getRsEvent(@PathVariable int index) {
         // FIXME: Exception Handling - index out of bound.
-        return rsList.get(index - 1);
+        return rsEventList.get(index - 1);
     }
 
     @PostMapping("/rs/list")
-    public void addRsEvent(@RequestBody String rsEvent) {
-        rsList.add(rsEvent);
+    public void addRsEvent(@RequestBody RsEvent rsEvent) {
+        rsEventList.add(rsEvent);
     }
 
     @PostMapping("/rs/{index}")
-    public void updateRsEvent(@PathVariable Integer index, @RequestBody String rsEvent) {
-        rsList.set(index, rsEvent);
+    public void updateRsEvent(@PathVariable Integer index, @RequestBody RsEvent rsEvent) {
+        rsEventList.set(index-1, rsEvent);
     }
 }

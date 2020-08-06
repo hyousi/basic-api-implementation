@@ -1,5 +1,7 @@
 package com.thoughtworks.rslist.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thoughtworks.rslist.domain.RsEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import static org.hamcrest.Matchers.is;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -21,46 +26,56 @@ public class RsControllerTests {
     @Autowired
     MockMvc mockMvc;
 
+    ObjectMapper objectMapper;
+
     @BeforeEach
     private void setup() {
-        RsController.rsList = RsController.init();
+        RsController.rsEventList = RsController.init();
+        objectMapper = new ObjectMapper();
     }
 
     @Test
     public void shouldGetAllRsEvents() throws Exception {
         mockMvc.perform(get("/rs/list").contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().string("[第一条事件, 第二条事件, 第三条事件]"))
+            .andExpect(content().string(objectMapper.writeValueAsString(RsController.rsEventList)))
             .andExpect(status().isOk());
     }
 
     @Test
     public void shouldGetOneRsEvent() throws Exception {
         mockMvc.perform(get("/rs/1").contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().string("第一条事件"))
+            .andExpect(content().string(objectMapper.writeValueAsString(RsController.rsEventList.get(0))))
             .andExpect(status().isOk());
     }
 
     @Test
     public void shouldGetRsEventBetween() throws Exception {
         mockMvc.perform(get("/rs/list?start=1&end=2").contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().string("[第一条事件, 第二条事件]"))
+            .andExpect(content().string(objectMapper.writeValueAsString(RsController.rsEventList.subList(0, 2))))
             .andExpect(status().isOk());
     }
 
     @Test
     public void shouldAddRsEvent() throws Exception {
-        mockMvc.perform(post("/rs/list").contentType(MediaType.APPLICATION_JSON).content("第四条事件"))
+        RsEvent rsEvent = new RsEvent("第四条事件", "未分类");
+        mockMvc.perform(post("/rs/list").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(rsEvent)))
             .andExpect(status().isOk());
 
-        assertEquals(4, RsController.rsList.size());
-        assertEquals("第四条事件", RsController.rsList.get(3));
+        assertEquals(4, RsController.rsEventList.size());
+        mockMvc.perform(get("/rs/4").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.eventName", is("第四条事件")))
+            .andExpect(status().isOk());
     }
 
     @Test
     public void shouldUpdateRsEvent() throws Exception {
-        mockMvc.perform(post("/rs/1").contentType(MediaType.APPLICATION_JSON).content("第一条时间"))
+        RsEvent rsEvent = new RsEvent("第一条时间", "未分类");
+        mockMvc.perform(post("/rs/1").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(rsEvent)))
             .andExpect(status().isOk());
 
-        assertEquals("第一条时间", RsController.rsList.get(1));
+        mockMvc.perform(get("/rs/1").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.eventName", is("第一条时间")))
+            .andExpect(jsonPath("$.keyword", is("未分类")))
+            .andExpect(status().isOk());
     }
 }
