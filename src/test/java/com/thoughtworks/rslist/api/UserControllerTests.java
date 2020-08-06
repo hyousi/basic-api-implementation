@@ -1,6 +1,8 @@
 package com.thoughtworks.rslist.api;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +26,13 @@ public class UserControllerTests {
     @BeforeEach
     private void setup() {
         objectMapper = new ObjectMapper();
+    }
+
+    @Test
+    public void shouldGetAllUsers() throws Exception {
+        mockMvc.perform(get("/user")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().string(objectMapper.writeValueAsString(UserController.userList)));
     }
 
     @Test
