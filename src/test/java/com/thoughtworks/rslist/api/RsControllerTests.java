@@ -1,5 +1,6 @@
 package com.thoughtworks.rslist.api;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -20,6 +21,11 @@ public class RsControllerTests {
     @Autowired
     MockMvc mockMvc;
 
+    @BeforeEach
+    private void setup() {
+        RsController.rsList = RsController.init();
+    }
+
     @Test
     public void shouldGetAllRsEvents() throws Exception {
         mockMvc.perform(get("/rs/list").contentType(MediaType.APPLICATION_JSON))
@@ -29,7 +35,7 @@ public class RsControllerTests {
 
     @Test
     public void shouldGetOneRsEvent() throws Exception {
-        mockMvc.perform(get("/rs/list/1").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/rs/1").contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().string("第一条事件"))
             .andExpect(status().isOk());
     }
@@ -52,7 +58,7 @@ public class RsControllerTests {
 
     @Test
     public void shouldUpdateRsEvent() throws Exception {
-        mockMvc.perform(post("/rs/list/1").contentType(MediaType.APPLICATION_JSON).content("第一条时间"))
+        mockMvc.perform(post("/rs/1").contentType(MediaType.APPLICATION_JSON).content("第一条时间"))
             .andExpect(status().isOk());
 
         assertEquals("第一条时间", RsController.rsList.get(1));
