@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -65,7 +66,8 @@ public class RsControllerTests {
         RsEvent rsEvent = new RsEvent("第四条事件", "未分类", user);
         mockMvc.perform(post("/rs/list").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(rsEvent)))
-            .andExpect(status().isOk());
+            .andExpect(status().isCreated())
+            .andExpect(header().string("index", "4"));
 
         assertEquals(4, RsController.rsEventList.size());
         mockMvc.perform(get("/rs/4").contentType(MediaType.APPLICATION_JSON))
@@ -79,7 +81,8 @@ public class RsControllerTests {
         RsEvent rsEvent = new RsEvent("第一条时间", "未分类");
         mockMvc.perform(post("/rs/1").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(rsEvent)))
-            .andExpect(status().isOk());
+            .andExpect(status().isCreated())
+            .andExpect(header().string("index", "1"));
 
         mockMvc.perform(get("/rs/1").contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.eventName", is("第一条时间")))
@@ -93,7 +96,8 @@ public class RsControllerTests {
         mockMvc.perform(post("/rs/1")
             .contentType(MediaType.APPLICATION_JSON)
             .content(request))
-            .andExpect(status().isOk());
+            .andExpect(status().isCreated())
+            .andExpect(header().string("index", "1"));
 
         mockMvc.perform(get("/rs/1").contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.eventName", is("第一条事件")))
