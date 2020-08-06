@@ -24,4 +24,11 @@ public class RsControllerTests {
             .andExpect(content().string("[第一条事件, 第二条事件, 第三条事件]"))
             .andExpect(status().isOk());
     }
+
+    @Test
+    public void shouldGetOneRsEvent() throws Exception {
+        mockMvc.perform(get("/rs/list/1").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().string("第一条事件"))
+            .andExpect(status().isOk());
+    }
 }
