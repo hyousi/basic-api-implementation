@@ -31,4 +31,11 @@ public class RsControllerTests {
             .andExpect(content().string("第一条事件"))
             .andExpect(status().isOk());
     }
+
+    @Test
+    public void shouldGetRsEventBetween() throws Exception {
+        mockMvc.perform(get("/rs/list?start=1&end=2").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().string("[第一条事件, 第二条事件]"))
+            .andExpect(status().isOk());
+    }
 }

@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
@@ -15,8 +16,14 @@ public class RsController {
     private List<String> rsList = Stream.of("第一条事件", "第二条事件", "第三条事件").collect(Collectors.toList());
 
     @GetMapping("/rs/list")
-    public String getRsEvents() {
-        return rsList.toString();
+    public String getRsEvents(@RequestParam(required = false) Integer start,
+                              @RequestParam(required = false) Integer end) {
+        // FIXME: Exception Handling - index out of bound.
+        if (start == null || end == null) {
+            return rsList.toString();
+        }
+
+        return rsList.subList(start - 1, end).toString();
     }
 
     @GetMapping("/rs/list/{index}")
