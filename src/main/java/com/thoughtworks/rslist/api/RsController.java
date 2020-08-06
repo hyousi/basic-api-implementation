@@ -38,4 +38,9 @@ public class RsController {
     public void addRsEvent(@RequestBody String rsEvent) {
         rsList.add(rsEvent);
     }
+
+    @PostMapping("/rs/list/{index}")
+    public void updateRsEvent(@PathVariable Integer index, @RequestBody String rsEvent) {
+        rsList.set(index, rsEvent);
+    }
 }

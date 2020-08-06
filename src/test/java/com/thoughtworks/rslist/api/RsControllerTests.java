@@ -49,4 +49,12 @@ public class RsControllerTests {
         assertEquals(4, RsController.rsList.size());
         assertEquals("第四条事件", RsController.rsList.get(3));
     }
+
+    @Test
+    public void shouldUpdateRsEvent() throws Exception {
+        mockMvc.perform(post("/rs/list/1").contentType(MediaType.APPLICATION_JSON).content("第一条时间"))
+            .andExpect(status().isOk());
+
+        assertEquals("第一条时间", RsController.rsList.get(1));
+    }
 }
