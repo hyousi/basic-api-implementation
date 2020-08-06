@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -44,21 +45,24 @@ public class RsControllerTests {
     @Test
     public void shouldGetOneRsEvent() throws Exception {
         mockMvc.perform(get("/rs/1").contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().string(objectMapper.writeValueAsString(RsController.rsEventList.get(0))))
+            .andExpect(
+                content().string(objectMapper.writeValueAsString(RsController.rsEventList.get(0))))
             .andExpect(status().isOk());
     }
 
     @Test
     public void shouldGetRsEventBetween() throws Exception {
         mockMvc.perform(get("/rs/list?start=1&end=2").contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().string(objectMapper.writeValueAsString(RsController.rsEventList.subList(0, 2))))
+            .andExpect(content()
+                .string(objectMapper.writeValueAsString(RsController.rsEventList.subList(0, 2))))
             .andExpect(status().isOk());
     }
 
     @Test
     public void shouldAddRsEvent() throws Exception {
         RsEvent rsEvent = new RsEvent("第四条事件", "未分类");
-        mockMvc.perform(post("/rs/list").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(rsEvent)))
+        mockMvc.perform(post("/rs/list").contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(rsEvent)))
             .andExpect(status().isOk());
 
         assertEquals(4, RsController.rsEventList.size());
@@ -92,5 +96,14 @@ public class RsControllerTests {
             .andExpect(jsonPath("$.eventName", is("第一条事件")))
             .andExpect(jsonPath("$.keyword", is("关键词")))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    public void shouldRemoveRsEvent() throws Exception {
+        mockMvc.perform(delete("/rs/1")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        assertEquals(2, RsController.rsEventList.size());
     }
 }

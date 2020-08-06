@@ -2,6 +2,7 @@ package com.thoughtworks.rslist.api;
 
 import com.thoughtworks.rslist.domain.RsEvent;
 import java.util.ArrayList;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -56,5 +57,10 @@ public class RsController {
         if (rsEvent.getKeyword() != null) {
             rsEventList.get(index - 1).setKeyword(rsEvent.getKeyword());
         }
+    }
+
+    @DeleteMapping("/rs/{index}")
+    public void removeRsEvent(@PathVariable int index) {
+        rsEventList.remove(index-1);
     }
 }
