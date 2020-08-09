@@ -1,9 +1,13 @@
 package com.thoughtworks.rslist.api;
 
 import com.thoughtworks.rslist.domain.User;
-import java.util.ArrayList;
+import com.thoughtworks.rslist.entity.UserEntity;
+import com.thoughtworks.rslist.repository.UserRepository;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,25 +18,29 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class UserController {
 
-    public static List<User> userList = init();
+    public UserRepository userRepository;
 
-    public static List<User> init() {
-        List<User> users = new ArrayList<>();
-        users.add(new User("user1", 22, "male", "a@b.com", "11111111111"));
-        return users;
+    @Autowired
+    public UserController(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/users")
     public List<User> getUsers() {
-        return userList;
+        List<UserEntity> userEntityList = userRepository.findAll();
+        return userEntityList.stream().map(UserEntity::toUser).collect(Collectors.toList());
     }
 
     @PostMapping("/user")
     public ResponseEntity addUser(@RequestBody @Valid User user) {
-        if (!userList.contains(user)) {
-            userList.add(user);
+        Optional<UserEntity> userEntity = userRepository.findByPhone(user.getPhone());
+        if (!userEntity.isPresent()) {
+            userRepository.save(user.toUserEntity());
+            return ResponseEntity.status(HttpStatus.CREATED).header("index", String.valueOf(userRepository.count())).build();
+        } else {
+            return ResponseEntity.ok().body("User Exists");
         }
-        return ResponseEntity.status(HttpStatus.CREATED).header("index", String.valueOf(userList.size())).build();
+
     }
 
 }

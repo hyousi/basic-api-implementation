@@ -1,5 +1,6 @@
 package com.thoughtworks.rslist.api;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -9,12 +10,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.rslist.domain.User;
+import com.thoughtworks.rslist.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.web.JsonPath;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -26,20 +27,21 @@ public class UserControllerTests {
 
     @Autowired
     MockMvc mockMvc;
-    ObjectMapper objectMapper;
+
+    @Autowired
+    UserRepository userRepository;
+
+    private final static ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     private void setup() {
-        UserController.userList = UserController.init();
-        objectMapper = new ObjectMapper();
-
+        userRepository.deleteAll();
     }
 
     @Test
     public void shouldGetAllUsers() throws Exception {
-        UserController.userList.clear();
         User user = new User("dangz", 22, "male", "a@b.com", "11111111111");
-        UserController.userList.add(user);
+        userRepository.save(user.toUserEntity());
 
         mockMvc.perform(get("/users")
             .contentType(MediaType.APPLICATION_JSON))
@@ -60,20 +62,23 @@ public class UserControllerTests {
             .contentType(MediaType.APPLICATION_JSON)
             .content(userJson))
             .andExpect(status().isCreated())
-            .andExpect(header().string("index", "2"));
+            .andExpect(header().string("index", "1"));
+        assertEquals(1, userRepository.count());
     }
 
     @Test
-    public void shouldNotAddContainedUser() throws Exception {
-        User existUser = UserController.userList.get(0);
-        int length = UserController.userList.size();
-        String userJson = objectMapper.writeValueAsString(existUser);
+    public void shouldNotAddExistedUser() throws Exception {
+        User user = new User("dangz", 22, "male", "a@b.com", "11111111111");
+        userRepository.save(user.toUserEntity());
+        int length = (int) userRepository.count();
+        String userJson = objectMapper.writeValueAsString(user);
 
         mockMvc.perform(post("/user")
             .contentType(MediaType.APPLICATION_JSON)
             .content(userJson))
-            .andExpect(status().isCreated())
-            .andExpect(header().string("index", "1"));
+            .andExpect(status().isOk())
+            .andExpect(content().string("User Exists"));
+
         mockMvc.perform(get("/users")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())

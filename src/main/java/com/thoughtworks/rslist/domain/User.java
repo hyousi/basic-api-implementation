@@ -1,6 +1,7 @@
 package com.thoughtworks.rslist.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.thoughtworks.rslist.entity.UserEntity;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -38,4 +39,14 @@ public class User {
     @JsonProperty(value = "user_phone")
     @Pattern(regexp = "1\\d{10}")
     private String phone;
+
+    public UserEntity toUserEntity() {
+        return UserEntity.builder()
+            .username(userName)
+            .age(age)
+            .gender(gender)
+            .email(email)
+            .phone(phone)
+            .build();
+    }
 }
