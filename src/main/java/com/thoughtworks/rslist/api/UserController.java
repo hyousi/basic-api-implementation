@@ -22,7 +22,7 @@ public class UserController {
         return users;
     }
 
-    @GetMapping("/user")
+    @GetMapping("/users")
     public List<User> getUsers() {
         return userList;
     }

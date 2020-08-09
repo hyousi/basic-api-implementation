@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.web.JsonPath;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -29,14 +30,25 @@ public class UserControllerTests {
 
     @BeforeEach
     private void setup() {
+        UserController.userList = UserController.init();
         objectMapper = new ObjectMapper();
+
     }
 
     @Test
     public void shouldGetAllUsers() throws Exception {
-        mockMvc.perform(get("/user")
+        UserController.userList.clear();
+        User user = new User("dangz", 22, "male", "a@b.com", "11111111111");
+        UserController.userList.add(user);
+
+        mockMvc.perform(get("/users")
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().string(objectMapper.writeValueAsString(UserController.userList)));
+            .andExpect(jsonPath("$[0].user_name", is("dangz")))
+            .andExpect(jsonPath("$[0].user_age", is(22)))
+            .andExpect(jsonPath("$[0].user_gender", is("male")))
+            .andExpect(jsonPath("$[0].user_email", is("a@b.com")))
+            .andExpect(jsonPath("$[0].user_phone", is("11111111111")))
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -62,7 +74,7 @@ public class UserControllerTests {
             .content(userJson))
             .andExpect(status().isCreated())
             .andExpect(header().string("index", "1"));
-        mockMvc.perform(get("/user")
+        mockMvc.perform(get("/users")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()", is(length)));
