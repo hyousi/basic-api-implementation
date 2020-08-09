@@ -45,6 +45,23 @@ public class RsControllerTests {
     }
 
     @Test
+    public void shouldGetAllRsEventsOutOfBound() throws Exception {
+        int start = 1;
+        int end = RsController.rsEventList.size();
+        String url;
+
+        url = String.format("/rs/list?start=%d&end=%d", start-1, end);
+        mockMvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.error", is("invalid request param")))
+            .andExpect(status().isBadRequest());
+
+        url = String.format("/rs/list?start=%d&end=%d", start, end+1);
+        mockMvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.error", is("invalid request param")))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void shouldGetOneRsEvent() throws Exception {
         mockMvc.perform(get("/rs/1").contentType(MediaType.APPLICATION_JSON))
             .andExpect(
