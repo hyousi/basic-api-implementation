@@ -1,6 +1,7 @@
 package com.thoughtworks.rslist.api;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -103,5 +104,14 @@ public class UserControllerTests {
         mockMvc.perform(get("/users/random").contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest())
             .andExpect(content().string("User Not Found."));
+    }
+
+    @Test void shouldDeleteUser() throws Exception {
+        User user = new User("dangz", 22, "male", "a@b.com", "11111111111");
+        userRepository.save(user.toUserEntity());
+
+        mockMvc.perform(delete("/users/dangz").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+        assertEquals(0, userRepository.count());
     }
 }
