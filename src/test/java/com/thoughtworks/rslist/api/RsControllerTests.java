@@ -72,7 +72,14 @@ public class RsControllerTests {
         assertEquals(4, RsController.rsEventList.size());
         mockMvc.perform(get("/rs/4").contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.eventName", is("第四条事件")))
-            .andExpect(jsonPath("$.user.userName", is("xiaowang")))
+            .andExpect(jsonPath("$.user").doesNotExist())
+            .andExpect(status().isOk());
+
+        mockMvc.perform(get("/rs/list").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$[0].user").doesNotExist())
+            .andExpect(jsonPath("$[1].user").doesNotExist())
+            .andExpect(jsonPath("$[2].user").doesNotExist())
+            .andExpect(jsonPath("$[3].user").doesNotExist())
             .andExpect(status().isOk());
     }
 
