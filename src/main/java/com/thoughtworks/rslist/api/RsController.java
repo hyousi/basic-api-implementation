@@ -4,6 +4,8 @@ import com.thoughtworks.rslist.component.CommonException;
 import com.thoughtworks.rslist.domain.RsEvent;
 import java.util.ArrayList;
 import javax.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -24,6 +26,9 @@ import java.util.List;
 public class RsController {
 
     public static List<RsEvent> rsEventList = init();
+
+    private Logger logger = LoggerFactory.getLogger(RsController.class);
+
 
     public static List<RsEvent> init() {
         List<RsEvent> rsEventList = new ArrayList<>();
@@ -84,11 +89,15 @@ public class RsController {
 
     @ExceptionHandler(IndexOutOfBoundsException.class)
     public ResponseEntity<CommonException> indexOutOfBoundsHandler(Exception exception) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CommonException(exception.getMessage()));
+        String msg =exception.getMessage();
+        logger.error(msg);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CommonException(msg));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<CommonException> bodyArgNotValidHandler(Exception exception) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CommonException("invalid param"));
+        String msg = "invalid param";
+        logger.error(msg);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CommonException(msg));
     }
 }
