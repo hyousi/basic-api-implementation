@@ -3,8 +3,10 @@ package com.thoughtworks.rslist.api;
 import com.thoughtworks.rslist.component.CommonException;
 import com.thoughtworks.rslist.domain.RsEvent;
 import java.util.ArrayList;
+import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,7 +61,7 @@ public class RsController {
     }
 
     @PostMapping("/rs/list")
-    public ResponseEntity addRsEvent(@RequestBody RsEvent rsEvent) {
+    public ResponseEntity addRsEvent(@RequestBody @Valid RsEvent rsEvent) {
         rsEventList.add(rsEvent);
         return ResponseEntity.status(HttpStatus.CREATED).header("index", String.valueOf(rsEventList.size())).build();
     }
@@ -77,11 +79,16 @@ public class RsController {
 
     @DeleteMapping("/rs/{index}")
     public void removeRsEvent(@PathVariable int index) {
-        rsEventList.remove(index-1);
+        rsEventList.remove(index - 1);
     }
 
     @ExceptionHandler(IndexOutOfBoundsException.class)
     public ResponseEntity<CommonException> indexOutOfBoundsHandler(Exception exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CommonException(exception.getMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<CommonException> bodyArgNotValidHandler(Exception exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CommonException("invalid param"));
     }
 }

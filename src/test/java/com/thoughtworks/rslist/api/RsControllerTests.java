@@ -118,6 +118,14 @@ public class RsControllerTests {
     }
 
     @Test
+    public void shouldAddValidRsEvent() throws Exception {
+        String invalidJson = "{\"eventNames\": \"fourth Event\",\"keywords\": \"None\"}";
+        mockMvc.perform(post("/rs/list").contentType(MediaType.APPLICATION_JSON).content(invalidJson))
+            .andExpect(jsonPath("$.error", is("invalid param")))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void shouldUpdateRsEvent() throws Exception {
         RsEvent rsEvent = new RsEvent("第一条时间", "未分类");
         mockMvc.perform(post("/rs/1").contentType(MediaType.APPLICATION_JSON)
