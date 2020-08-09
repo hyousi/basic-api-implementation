@@ -70,6 +70,23 @@ public class RsControllerTests {
     }
 
     @Test
+    public void shouldGetOneRsEventOutOfBound() throws Exception {
+        int start = 1;
+        int end = RsController.rsEventList.size();
+        String url;
+
+        url = String.format("/rs/%d", start-1);
+        mockMvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.error", is("invalid index")))
+            .andExpect(status().isBadRequest());
+
+        url = String.format("/rs/%d", end+1);
+        mockMvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.error", is("invalid index")))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void shouldGetRsEventBetween() throws Exception {
         mockMvc.perform(get("/rs/list?start=1&end=2").contentType(MediaType.APPLICATION_JSON))
             .andExpect(content()

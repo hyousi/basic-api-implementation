@@ -51,8 +51,11 @@ public class RsController {
 
     @GetMapping("/rs/{index}")
     public RsEvent getRsEvent(@PathVariable int index) {
-        // FIXME: Exception Handling - index out of bound.
-        return rsEventList.get(index - 1);
+        try {
+            return rsEventList.get(index - 1);
+        } catch (IndexOutOfBoundsException e) {
+            throw new IndexOutOfBoundsException("invalid index");
+        }
     }
 
     @PostMapping("/rs/list")
