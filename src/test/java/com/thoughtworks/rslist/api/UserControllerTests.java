@@ -84,4 +84,24 @@ public class UserControllerTests {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()", is(length)));
     }
+
+    @Test
+    public void shouldGetUser() throws Exception {
+        User user = new User("dangz", 22, "male", "a@b.com", "11111111111");
+        String userJson = objectMapper.writeValueAsString(user);
+        userRepository.save(user.toUserEntity());
+
+        mockMvc.perform(get("/users/dangz").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().string(userJson));
+    }
+
+    @Test void shouldNotGetUser() throws Exception {
+        User user = new User("dangz", 22, "male", "a@b.com", "11111111111");
+        userRepository.save(user.toUserEntity());
+
+        mockMvc.perform(get("/users/random").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string("User Not Found."));
+    }
 }
