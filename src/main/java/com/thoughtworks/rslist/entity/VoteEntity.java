@@ -1,11 +1,10 @@
 package com.thoughtworks.rslist.entity;
 
-import com.thoughtworks.rslist.domain.RsEvent;
-import com.thoughtworks.rslist.domain.User;
-import com.thoughtworks.rslist.repository.UserRepository;
+import java.time.LocalDate;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -17,27 +16,26 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "rs_entity")
 @Builder
-public class RsEventEntity {
-
+@Table(name ="vote")
+public class VoteEntity {
     @Id
     @GeneratedValue
-    private int id;
+    private Integer id;
 
-    private String eventName;
+    private Integer voteNum;
 
-    private String keyword;
+    private LocalDate voteTime;
 
-    private int userId;
+    private Integer userId;
+
+    private Integer rsEventId;
 
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private UserEntity userEntity;
 
-    @Builder.Default
-    private Integer voteNum = 0;
-
-    public RsEvent toRsEvent() {
-        return new RsEvent(id, eventName, keyword, voteNum);
-    }
+    @ManyToOne
+    @JoinColumn(name = "event_id")
+    private RsEventEntity rsEventEntity;
 }

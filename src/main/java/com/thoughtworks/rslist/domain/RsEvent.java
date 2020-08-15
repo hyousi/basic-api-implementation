@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RsEvent {
 
+    private int id;
+
     private String eventName;
 
     private String keyword;
@@ -18,9 +20,20 @@ public class RsEvent {
     @NotNull
     private Integer userId;
 
-    public RsEvent(String eventName, String keyword) {
+    private int voteNum;
+
+    public RsEvent(String eventName, String keyword,
+        @NotNull Integer userId) {
         this.eventName = eventName;
         this.keyword = keyword;
+        this.userId = userId;
+    }
+
+    public RsEvent(int id, String eventName, String keyword, int voteNum) {
+        this.id = id;
+        this.eventName = eventName;
+        this.keyword = keyword;
+        this.voteNum = voteNum;
     }
 
     public RsEventEntity toRsEventEntity() {
