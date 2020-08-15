@@ -6,6 +6,7 @@ import com.thoughtworks.rslist.repository.UserRepository;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,6 +30,9 @@ public class RsEventEntity {
     private String keyword;
 
     private int userId;
+
+    @ManyToOne
+    private UserEntity userEntity;
 
     public RsEvent toRsEvent() {
         return new RsEvent(eventName, keyword);
