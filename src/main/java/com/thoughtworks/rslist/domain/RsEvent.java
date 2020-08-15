@@ -11,13 +11,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RsEvent {
 
-    @NotNull
     private String eventName;
 
-    @NotNull
     private String keyword;
 
-    private int userId;
+    @NotNull
+    private Integer userId;
 
     public RsEvent(String eventName, String keyword) {
         this.eventName = eventName;

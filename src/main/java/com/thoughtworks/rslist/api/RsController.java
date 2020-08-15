@@ -4,6 +4,7 @@ import com.thoughtworks.rslist.component.CommonException;
 import com.thoughtworks.rslist.domain.RsEvent;
 import com.thoughtworks.rslist.entity.RsEventEntity;
 import com.thoughtworks.rslist.repository.RsEventRepository;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -62,7 +64,7 @@ public class RsController {
     }
 
     @PostMapping("/rs/list")
-    public ResponseEntity addRsEvent(@RequestBody @Valid RsEvent rsEvent) {
+    public ResponseEntity addRsEvent (@RequestBody @Valid RsEvent rsEvent) {
         if (rsEventRepository.findByEventNameAndKeyword(rsEvent.getEventName(), rsEvent.getKeyword()) != null) {
             throw new IllegalArgumentException();
         } else {
@@ -71,17 +73,25 @@ public class RsController {
         }
     }
 
-    @PostMapping("/rs/{index}")
-    public ResponseEntity updateRsEvent(@PathVariable Integer index, @RequestBody RsEvent rsEvent) {
-        RsEventEntity target = rsEventRepository.findAllByOrderByIdAsc().get(index-1);
-        String eventName = rsEvent.getEventName() == null ? target.getEventName() : rsEvent.getEventName();
-        String keyword = rsEvent.getKeyword() == null ? target.getKeyword() : rsEvent.getKeyword();
+    @PatchMapping("/rs/{rsEventId}")
+    public ResponseEntity updateRsEvent(@PathVariable int rsEventId , @RequestBody @Valid RsEvent rsEvent) {
+        Optional<RsEventEntity> target = rsEventRepository.findById(rsEventId);
+        if (!target.isPresent()) {
+            return ResponseEntity.badRequest().build();
+        } else {
+            if (target.get().getUserId() != rsEvent.getUserId()) {
+                return ResponseEntity.badRequest().build();
+            } else {
+                RsEventEntity entity = target.get();
+                String eventName = rsEvent.getEventName() == null ? entity.getEventName() : rsEvent.getEventName();
+                String keyword = rsEvent.getKeyword() == null ? entity.getKeyword() : rsEvent.getKeyword();
 
-        target.setEventName(eventName);
-        target.setKeyword(keyword);
-        rsEventRepository.save(target);
-
-        return ResponseEntity.status(HttpStatus.CREATED).header("index", String.valueOf(index)).build();
+                entity.setEventName(eventName);
+                entity.setKeyword(keyword);
+                rsEventRepository.save(entity);
+                return ResponseEntity.ok().build();
+            }
+        }
     }
 
     @DeleteMapping("/rs/{index}")

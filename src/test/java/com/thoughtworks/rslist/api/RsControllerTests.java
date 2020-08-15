@@ -18,11 +18,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -143,7 +142,7 @@ public class RsControllerTests {
 
     @Test
     public void shouldAddValidRsEvent() throws Exception {
-        String invalidJson = "{\"eventNames\": \"fourth Event\",\"keywords\": \"None\"}";
+        String invalidJson = "{\"eventName\": \"fourth Event\",\"keyword\": \"None\"}";
         mockMvc.perform(post("/rs/list").contentType(MediaType.APPLICATION_JSON).content(invalidJson))
             .andExpect(jsonPath("$.error", is("invalid param")))
             .andExpect(status().isBadRequest());
@@ -151,11 +150,13 @@ public class RsControllerTests {
 
     @Test
     public void shouldUpdateRsEvent() throws Exception {
-        RsEvent rsEvent = new RsEvent("new EventA", "new null");
-        mockMvc.perform(post("/rs/1").contentType(MediaType.APPLICATION_JSON)
+        RsEventEntity target = rsEventRepository.findByEventNameAndKeyword("EventA", "null");
+        RsEvent rsEvent = new RsEvent("new EventA", "new null", target.getUserId());
+
+        String url = String.format("/rs/%d", target.getId());
+        mockMvc.perform(patch(url).contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(rsEvent)))
-            .andExpect(status().isCreated())
-            .andExpect(header().string("index", "1"));
+            .andExpect(status().isOk());
 
         mockMvc.perform(get("/rs/1").contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.eventName", is("new EventA")))
@@ -164,18 +165,12 @@ public class RsControllerTests {
     }
 
     @Test
-    public void shouldUpdateRsEventProperty() throws Exception {
+    public void shouldNotUpdateRsEventProperty() throws Exception {
         String request = "{\"keyword\": \"关键词\"}";
         mockMvc.perform(post("/rs/1")
             .contentType(MediaType.APPLICATION_JSON)
             .content(request))
-            .andExpect(status().isCreated())
-            .andExpect(header().string("index", "1"));
-
-        mockMvc.perform(get("/rs/1").contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.eventName", is("EventA")))
-            .andExpect(jsonPath("$.keyword", is("关键词")))
-            .andExpect(status().isOk());
+            .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
