@@ -1,1 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/springdb?characterEncoding=UTF-8&useSSL=false
+    username: root
+    password: t0iiz
+    driver-class-name: com.mysql.jdbc.Driver
 
+  jpa:
+    hibernate:
+      ddl-auto: create
