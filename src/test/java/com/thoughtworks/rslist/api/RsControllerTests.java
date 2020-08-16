@@ -7,6 +7,7 @@ import com.thoughtworks.rslist.entity.RsEventEntity;
 import com.thoughtworks.rslist.entity.UserEntity;
 import com.thoughtworks.rslist.repository.RsEventRepository;
 import com.thoughtworks.rslist.repository.UserRepository;
+import com.thoughtworks.rslist.repository.VoteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,8 @@ public class RsControllerTests {
     RsEventRepository rsEventRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    VoteRepository voteRepository;
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -51,9 +54,12 @@ public class RsControllerTests {
         userRepository.save(userA);
         userRepository.save(userB);
         userRepository.save(userC);
-        RsEvent rsEventA = new RsEvent("EventA", "null", userA.getID());
-        RsEvent rsEventB = new RsEvent("EventB", "null", userB.getID());
-        RsEvent rsEventC = new RsEvent("EventC", "null", userC.getID());
+        int userAId = userRepository.findByUsername("userA").get().getID();
+        int userBId = userRepository.findByUsername("userB").get().getID();
+        int userCId = userRepository.findByUsername("userC").get().getID();
+        RsEvent rsEventA = new RsEvent("EventA", "null", userAId);
+        RsEvent rsEventB = new RsEvent("EventB", "null", userBId);
+        RsEvent rsEventC = new RsEvent("EventC", "null", userCId);
         rsEventRepository.save(rsEventA.toRsEventEntity());
         rsEventRepository.save(rsEventB.toRsEventEntity());
         rsEventRepository.save(rsEventC.toRsEventEntity());
@@ -75,12 +81,12 @@ public class RsControllerTests {
         int end = (int) rsEventRepository.count();
         String url;
 
-        url = String.format("/rs/list?start=%d&end=%d", start-1, end);
+        url = String.format("/rs/list?start=%d&end=%d", start - 1, end);
         mockMvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.error", is("invalid request param")))
             .andExpect(status().isBadRequest());
 
-        url = String.format("/rs/list?start=%d&end=%d", start, end+1);
+        url = String.format("/rs/list?start=%d&end=%d", start, end + 1);
         mockMvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.error", is("invalid request param")))
             .andExpect(status().isBadRequest());
@@ -92,7 +98,7 @@ public class RsControllerTests {
         int end = (int) rsEventRepository.count();
         String url;
 
-        url = String.format("/rs/list?start=%d&end=%d", start, end-1);
+        url = String.format("/rs/list?start=%d&end=%d", start, end - 1);
         mockMvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$", hasSize(2)))
             .andExpect(status().isOk());
@@ -111,12 +117,12 @@ public class RsControllerTests {
         int end = (int) rsEventRepository.count();
         String url;
 
-        url = String.format("/rs/%d", start-1);
+        url = String.format("/rs/%d", start - 1);
         mockMvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.error", is("invalid index")))
             .andExpect(status().isBadRequest());
 
-        url = String.format("/rs/%d", end+1);
+        url = String.format("/rs/%d", end + 1);
         mockMvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.error", is("invalid index")))
             .andExpect(status().isBadRequest());
@@ -128,7 +134,6 @@ public class RsControllerTests {
         userRepository.save(user.toUserEntity());
         int userId = userRepository.findByUsername("xiaowang").get().getID();
         RsEvent rsEvent = new RsEvent("第四条事件", "未分类", userId);
-
 
         mockMvc.perform(post("/rs/list").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(rsEvent)))
@@ -143,7 +148,8 @@ public class RsControllerTests {
     @Test
     public void shouldAddValidRsEvent() throws Exception {
         String invalidJson = "{\"eventName\": \"fourth Event\",\"keyword\": \"None\"}";
-        mockMvc.perform(post("/rs/list").contentType(MediaType.APPLICATION_JSON).content(invalidJson))
+        mockMvc
+            .perform(post("/rs/list").contentType(MediaType.APPLICATION_JSON).content(invalidJson))
             .andExpect(jsonPath("$.error", is("invalid param")))
             .andExpect(status().isBadRequest());
     }

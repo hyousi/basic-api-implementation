@@ -3,6 +3,7 @@ package com.thoughtworks.rslist.api;
 import com.thoughtworks.rslist.domain.Vote;
 import com.thoughtworks.rslist.entity.RsEventEntity;
 import com.thoughtworks.rslist.entity.UserEntity;
+import com.thoughtworks.rslist.entity.VoteEntity;
 import com.thoughtworks.rslist.repository.RsEventRepository;
 import com.thoughtworks.rslist.repository.UserRepository;
 import com.thoughtworks.rslist.repository.VoteRepository;
@@ -28,18 +29,26 @@ public class VoteController {
     public VoteRepository voteRepository;
 
     @Transactional
-    @PostMapping("/rs/vote/{rsEventId}")
+    @PostMapping("/rs/{rsEventId}/vote")
     public ResponseEntity voteForRsEvent(@PathVariable int rsEventId, @RequestBody Vote vote) throws Exception {
         Optional<UserEntity> userEntity = userRepository.findById(vote.getUserId());
         Optional<RsEventEntity> rsEventEntity = rsEventRepository.findById(rsEventId);
         if (userEntity.isPresent() && rsEventEntity.isPresent()) {
             int votes = vote.getVoteNum();
             if (votes <= userEntity.get().getVoteNum()) {
+
                 rsEventEntity.get().setVoteNum(rsEventEntity.get().getVoteNum() + votes);
                 rsEventRepository.save(rsEventEntity.get());
+
                 userEntity.get().setVoteNum(userEntity.get().getVoteNum() - votes);
                 userRepository.save(userEntity.get());
-                return ResponseEntity.ok().build();
+
+                VoteEntity voteEntity = vote.toVoteEntity(rsEventId);
+                voteEntity.setRsEventEntity(rsEventEntity.get());
+                voteEntity.setUserEntity(userEntity.get());
+                voteRepository.save(voteEntity);
+
+                return ResponseEntity.created(null).build();
             } else {
                 return ResponseEntity.badRequest().build();
             }

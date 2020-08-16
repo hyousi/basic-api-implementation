@@ -32,10 +32,10 @@ public class VoteEntity {
     private Integer rsEventId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "u_id")
     private UserEntity userEntity;
 
     @ManyToOne
-    @JoinColumn(name = "event_id")
+    @JoinColumn(name = "e_id")
     private RsEventEntity rsEventEntity;
 }
