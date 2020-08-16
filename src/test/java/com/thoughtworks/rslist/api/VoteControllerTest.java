@@ -1,7 +1,9 @@
 package com.thoughtworks.rslist.api;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -84,5 +86,22 @@ public class VoteControllerTest {
         mockMvc.perform(post(url).contentType(MediaType.APPLICATION_JSON).content(requestBody))
             .andExpect(status().isBadRequest());
 
+    }
+
+    @Test
+    public void shouldGetVotes() throws Exception {
+        int userId = userRepository.findByUsername("userA").get().getID();
+        int eventId = rsEventRepository.findByEventNameAndKeyword("EventA", "null").getId();
+        Vote voteA = new Vote(3, userId, "2020-08-01");
+        Vote voteB = new Vote(5, userId, "2020-08-03");
+
+        mockMvc.perform(post(String.format("/rs/%d/vote", eventId)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(voteA)))
+            .andExpect(status().isCreated());
+
+        mockMvc.perform(post(String.format("/rs/%d/vote", eventId)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(voteB)))
+            .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/votes?start=2020-08-01&end=2020-08-02").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$", hasSize(1)));
     }
 }

@@ -1,5 +1,6 @@
 package com.thoughtworks.rslist.entity;
 
+import com.thoughtworks.rslist.domain.Vote;
 import java.time.LocalDate;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -38,4 +39,8 @@ public class VoteEntity {
     @ManyToOne
     @JoinColumn(name = "e_id")
     private RsEventEntity rsEventEntity;
+
+    public Vote toVote() {
+        return new Vote(voteNum, userId, voteTime.toString());
+    }
 }

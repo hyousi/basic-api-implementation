@@ -7,13 +7,18 @@ import com.thoughtworks.rslist.entity.VoteEntity;
 import com.thoughtworks.rslist.repository.RsEventRepository;
 import com.thoughtworks.rslist.repository.UserRepository;
 import com.thoughtworks.rslist.repository.VoteRepository;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -55,5 +60,18 @@ public class VoteController {
         } else {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/votes")
+    public ResponseEntity<List<Vote>> getVotes(@RequestParam String start,
+        @RequestParam String end) {
+        LocalDate startDate = LocalDate.parse(start);
+        LocalDate endDate = LocalDate.parse(end);
+        List<VoteEntity> voteEntityList = voteRepository
+            .findAllByVoteTimeGreaterThanEqualAndVoteTimeLessThanEqual(startDate, endDate);
+
+        List<Vote> voteList = voteEntityList.stream().map(VoteEntity::toVote).collect(
+            Collectors.toList());
+        return ResponseEntity.ok(voteList);
     }
 }
